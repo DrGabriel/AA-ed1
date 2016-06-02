@@ -2,10 +2,17 @@
 #define LINKEDLIST_H_INCLUDED
 #include "node.h"
 
+typedef struct CHARBINCODE{
+	char character;
+	char * bincode;
+}CHARBINCODE;
+
 typedef struct CELL{
 	struct CELL *next;
-	NODE *leaf; 
+	NODE *leaf;
+	CHARBINCODE * binCode;
 }CELL;
+
 typedef struct LINKEDLIST{
 	CELL *first;
 	CELL *end;
@@ -13,10 +20,13 @@ typedef struct LINKEDLIST{
 }LINKEDLIST;
 
 NODE* searchData(char,LINKEDLIST *);
-void insertList(NODE*,LINKEDLIST *);
-CELL *new_cell(NODE *);
+void insertList(NODE*,CHARBINCODE*,LINKEDLIST *);
+CELL *new_cell(NODE *,CHARBINCODE *);
 CELL *removeFirst(LINKEDLIST *);
 LINKEDLIST * new_list();
+LINKEDLIST *codeTable(LINKEDLIST *);
 int emptyList(LINKEDLIST *);
+CHARBINCODE *new_binCode(char,char*);
+char * searchCode(char, LINKEDLIST *);
 
 #endif

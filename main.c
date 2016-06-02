@@ -4,26 +4,25 @@
 #include "heap.h"
 #include "datainput.h"
 #include "linkedlist.h"
+#include "string.h"
 
 int main(int argc, char *argv[]){
-    FILE *fp = fopen(argv[1], "r"); /* "r" = open for reading */
-	LINKEDLIST *list = new_list();
-	list = createLeafNodes(fp,list);
-	HEAP* heap = new_heap(list->size);
-	CELL *paux;
+	FILE *input = fopen(argv[1],"r");
+
+	FILE *output;
 	int i;
-	for(i=0;i<=list->size;i++){
-		paux = removeFirst(list);
-		printf("DATA:%c FREQUENCY:%d\n",paux->leaf->data, paux->leaf->frequency);
-		heap_push(heap,paux->leaf);
-	}
-	printf("HEAP before pop: ");
-	printHeap(heap);
-	NODE *paux1 = heap_pop(heap);
-	printf("HEAP after pop: ");
-	printHeap(heap);
+	/*while(1){
+		char c = fgetc(input);
+		if(c == EOF)
+			break;
+		printf("%c\n", c);
 
-
+	}*/
+	LINKEDLIST *list1 = new_list();
+	CELL * paux;
+	list1 =codeTable(list1);
+	compressFILE(input,list1,output);
+	free(list1);
 
 	return 0;
 }

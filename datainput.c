@@ -4,6 +4,7 @@
 #include <string.h>
 
 int totalBits;
+unsigned char bit_buffer;
 long totalChar(FILE * file){
 	long totalChar = 0;
 	char c;
@@ -39,14 +40,13 @@ LINKEDLIST * createLeafNodes(FILE *file, LINKEDLIST *list){
 }
 
 void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
-
-	unsigned char bit_buffer;
+	// O bit_buffer eh global, pois ao colocar ele como parametro de funcao cria uma copia dele q sera destruida
 	char data;
 	while(1){
 		data = fgetc(input);
 		if(data == 10 || data == EOF)
 			break;
-		writeBinCode(bit_buffer,data,charTable,output);
+		writeBinCode(data,charTable,output);
 	}
 
 	if(totalBits != 0){//COMPLETA ESPAÇOS COM 0 ATE FECHAR 1 BYTE, CASO O TOTAL DE BITS N SEJA MULTIPLO DE 8
@@ -59,7 +59,7 @@ void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
 	}
 }
 
-void writeBinCode(unsigned char bit_buffer,char data,LINKEDLIST *charTable,FILE *output){
+void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 	char *binCode = searchCode(data, charTable);//PEGA O CODIGO BINARIO DA LETRA
 	int i,tempBits;
 	totalBits += strlen(binCode);//TOTAL DE BITS LIDOS
@@ -68,7 +68,8 @@ void writeBinCode(unsigned char bit_buffer,char data,LINKEDLIST *charTable,FILE 
 		for(i=0;i<strlen(binCode);i++){
 			bit_buffer <<= 1;		//SHIFT DO BUFFER
 			if(binCode[i] == '1')	
-				bit_buffer |= 0x1;	//SE TIVER 1 ESCREVE 1 SENAO 0
+				bit_buffer |= 1;	//SE TIVER 1 ESCREVE 1 SENAO 0
+
 		}
 		fwrite(&bit_buffer,1,1,output); //ESCREVE NO ARQUIVO
 		totalBits = 0; //RESETA O TOTAL DE BITS
@@ -78,7 +79,7 @@ void writeBinCode(unsigned char bit_buffer,char data,LINKEDLIST *charTable,FILE 
 		for (i = 0; i < strlen(binCode) - tempBits; i++){
 			bit_buffer <<= 1;
 			if(binCode[i] == '1')
-				bit_buffer |= 0x1;
+				bit_buffer |= 1;
 		}
 		fwrite(&bit_buffer,1,1,output);
 		bit_buffer = 0;
@@ -87,13 +88,13 @@ void writeBinCode(unsigned char bit_buffer,char data,LINKEDLIST *charTable,FILE 
 		for (i; i < strlen(binCode); i++){//ESCREVE RESTO DO CODIGO NO BUFFER
 			bit_buffer <<= 1;
 			if(binCode[i] == '1')
-				bit_buffer |= 0x1;
+				bit_buffer |= 1;
 		}
 	}else{  //SE O TOTAL DE BITS FOR MENOR QUE 1 BYTE APENAS ESCREVE NO BUFFER
 		for(i=0;i<strlen(binCode);i++){
 			bit_buffer <<= 1;
 			if(binCode[i] == '1')
-				bit_buffer |= 0x1;
+				bit_buffer |= 1;
 		}
 	}
 	 

@@ -112,5 +112,6 @@ char * searchCode(char data, LINKEDLIST * codeTable){
 		}
 		paux = paux->next;
 	}
+	printf("CHAR NOT FOUND: %c DEC CODE: %d\n",data,data);
 	return NULL;
 }

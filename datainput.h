@@ -6,5 +6,5 @@
 long totalChar(FILE*);
 LINKEDLIST * createLeafNodes(FILE *, LINKEDLIST *);
 void compressFILE(FILE *, LINKEDLIST*,FILE*);
-void writeBinCode(unsigned char,char,LINKEDLIST *,FILE *);
+void writeBinCode(char,LINKEDLIST *,FILE *);
 #endif

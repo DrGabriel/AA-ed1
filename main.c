@@ -9,15 +9,9 @@
 int main(int argc, char *argv[]){
 	FILE *input = fopen(argv[1],"r");
 
-	FILE *output;
+	FILE *output = fopen(argv[2],"w");;
 	int i;
-	/*while(1){
-		char c = fgetc(input);
-		if(c == EOF)
-			break;
-		printf("%c\n", c);
-
-	}*/
+	
 	LINKEDLIST *list1 = new_list();
 	CELL * paux;
 	list1 =codeTable(list1);

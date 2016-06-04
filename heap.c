@@ -39,7 +39,7 @@ void perc_down(HEAP *heap){
 	int smallestChild;
 	while(pos <= heap->end/2){
 		int leftChild  = 2 * pos + 1;
-		int rightChild = 2 * pos + 1;
+		int rightChild = 2 * pos + 2;
 
 		if(rightChild <= heap->end && 
 			heap->nodes[leftChild]->frequency > heap->nodes[rightChild]->frequency){

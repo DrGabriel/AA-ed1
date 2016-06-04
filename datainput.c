@@ -3,7 +3,7 @@
 #include "datainput.h"
 #include <string.h>
 
-int totalBits;
+int totalBits,fileBits;
 unsigned char bit_buffer;
 long totalChar(FILE * file){
 	long totalChar = 0;
@@ -41,7 +41,20 @@ LINKEDLIST * createLeafNodes(FILE *file, LINKEDLIST *list){
 
 void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
 	// O bit_buffer eh global, pois ao colocar ele como parametro de funcao cria uma copia dele q sera destruida
+	CELL *paux = charTable->first;
 	char data;
+	//Escreve o total de bits
+	fprintf(output,"%d\n",totalBits);
+	//Escreve a tabela no arquivo
+	while(paux != NULL){
+		fprintf(output, "%s%c",paux->binCode->bincode,paux->binCode->character);
+		paux = paux->next;
+	}
+	fprintf(output,"\n");
+
+	free(paux);
+
+
 	while(1){
 		data = fgetc(input);
 		if(data == 10 || data == EOF)
@@ -55,8 +68,11 @@ void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
 			totalBits++;
 		}
 
+		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output);
 	}
+	fseek(output,0,SEEK_SET);
+	fprintf(output, "%d\n",fileBits);
 }
 
 void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
@@ -71,6 +87,7 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 				bit_buffer |= 1;	//SE TIVER 1 ESCREVE 1 SENAO 0
 
 		}
+		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output); //ESCREVE NO ARQUIVO
 		totalBits = 0; //RESETA O TOTAL DE BITS
 		bit_buffer = 0; // EU ACHO QUE LIMPA O BUFFER
@@ -81,6 +98,7 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 			if(binCode[i] == '1')
 				bit_buffer |= 1;
 		}
+		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output);
 		bit_buffer = 0;
 
@@ -99,9 +117,11 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 	}
 	 
 }
-void transformaBinario(char* nomeTexto){
+
+
+void transformaBinario(FILE *entrada){
   
-  FILE* entrada = fopen(nomeTexto,"r");
+  //FILE* entrada = fopen(nomeTexto,"r");
   
   int tamanho;
   int shift;
@@ -158,4 +178,5 @@ void transformaBinario(char* nomeTexto){
         
      }
   }
+  printf("oi %s\n",binarios);
 }

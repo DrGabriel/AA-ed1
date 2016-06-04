@@ -99,3 +99,63 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 	}
 	 
 }
+void transformaBinario(char* nomeTexto){
+  
+  FILE* entrada = fopen(nomeTexto,"r");
+  
+  int tamanho;
+  int shift;
+  int i,j;
+  
+  
+  fscanf(entrada,"%d",&tamanho);
+  //tamanho aqui é o numero de bits que será capturado;
+  
+  char binarios[tamanho];
+  int tamanhoBin = tamanho;
+  
+  shift=tamanho%8;
+  shift=8-shift;
+  tamanho= tamanho/8;
+  
+  if(shift){
+     tamanho++;     
+  }
+  
+  //tamanho agora tem o numero de chars do arquivo;
+  unsigned char chars [tamanho];
+  
+  fscanf(entrada,"%c",&chars[0]);//soh pra pegar o /n, q será sobrescrito abaixo
+  for(i=0;i<tamanho;i++)
+	 fscanf(entrada,"%c",&chars[i]);
+  
+  for(i=0;i<shift;i++){
+      chars[tamanho-1]>>=1;
+  }
+  
+  int posicao = tamanhoBin-1;
+  for(i=0;i<(8-shift);i++){
+      if(chars[tamanho-1] & (unsigned int) 1)
+        binarios[posicao]='1';
+      else
+        binarios[posicao]='0';
+        
+        chars[tamanho-1]>>=1;
+        posicao--;   
+  }
+  
+  for(i=tamanho-2;i>=0;i--){
+      for(j=0;j<8;j++){
+        
+        if(chars[i] & (unsigned int) 1)
+            binarios[posicao]='1';
+        else
+          binarios[posicao]='0';
+        
+        chars[i]>>=1;
+        posicao--;   
+         
+        
+     }
+  }
+}

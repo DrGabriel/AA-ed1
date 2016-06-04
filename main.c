@@ -7,15 +7,14 @@
 #include "string.h"
 
 int main(int argc, char *argv[]){
-	FILE *input = fopen(argv[1],"r");
 
-	FILE *output = fopen(argv[2],"w");;
+	//transformaBinario(output);
 	int i;
 	
 	LINKEDLIST *list1 = new_list();
 	CELL * paux;
 	list1 =codeTable(list1);
-	compressFILE(input,list1,output);
+	compressFILE(argv[1],agrv[2],list1);
 	free(list1);
 
 	return 0;

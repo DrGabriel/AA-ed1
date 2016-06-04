@@ -119,9 +119,9 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 }
 
 
-void transformaBinario(FILE *entrada){
+void transformaBinario(char *nomeTexto){
   
-  //FILE* entrada = fopen(nomeTexto,"r");
+  FILE* entrada = fopen(nomeTexto,"r");
   
   int tamanho;
   int shift;

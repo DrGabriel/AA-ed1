@@ -3,8 +3,10 @@
 #include "datainput.h"
 #include <string.h>
 
-int totalBits,fileBits;
+int totalBits;
+unsigned long fileBits;
 unsigned char bit_buffer;
+
 long totalChar(FILE * file){
 	long totalChar = 0;
 	char c;
@@ -39,21 +41,29 @@ LINKEDLIST * createLeafNodes(FILE *file, LINKEDLIST *list){
 
 }
 
-void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
+void compressFILE(char *inputName,char* outputName LINKEDLIST* charTable){
 	// O bit_buffer eh global, pois ao colocar ele como parametro de funcao cria uma copia dele q sera destruida
 	CELL *paux = charTable->first;
 	char data;
-	//Escreve o total de bits
-	fprintf(output,"%d\n",totalBits);
+	FILE *input = fopen(inputName,"r");
+	FILE *output = fopen(outputName,"w");
+
 	//Escreve a tabela no arquivo
+
 	while(paux != NULL){
 		fprintf(output, "%s%c",paux->binCode->bincode,paux->binCode->character);
 		paux = paux->next;
 	}
 	fprintf(output,"\n");
 
+	//Escreve o total de bits
+	fileTotalBits(charTable,input);
+	fprintf(output,"%lu\n",fileBits);
+
 	free(paux);
 
+	//Retorna ponteiro de leitura para o inicio do arquivo
+	fseek(input,0,SEEK_SET);
 
 	while(1){
 		data = fgetc(input);
@@ -71,8 +81,8 @@ void compressFILE(FILE *input, LINKEDLIST* charTable,FILE* output){
 		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output);
 	}
-	fseek(output,0,SEEK_SET);
-	fprintf(output, "%d\n",fileBits);
+	fclose(input);
+	fclose(output);
 }
 
 void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
@@ -119,9 +129,9 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 }
 
 
-void transformaBinario(char *nomeTexto){
+void transformaBinario(FILE *entrada){
   
-  FILE* entrada = fopen(nomeTexto,"r");
+  //FILE* entrada = fopen(nomeTexto,"r");
   
   int tamanho;
   int shift;
@@ -131,7 +141,7 @@ void transformaBinario(char *nomeTexto){
   fscanf(entrada,"%d",&tamanho);
   //tamanho aqui é o numero de bits que será capturado;
   
-  char binarios[tamanho];
+  char binarios[tamanho +1];
   int tamanhoBin = tamanho;
   
   shift=tamanho%8;
@@ -178,5 +188,18 @@ void transformaBinario(char *nomeTexto){
         
      }
   }
-  printf("oi %s\n",binarios);
+  for(i=0;i<tamanhoBin;i++)
+ 	printf("%c\n",binarios[i]);
+}
+
+void fileTotalBits(LINKEDLIST *charTable, FILE *input){
+	char data;
+	char *binCode;
+	while(1){
+		data =  fgetc(input);
+		if(data == EOF || data ==10)
+			break;
+		binCode = searchCode(data,charTable);
+		fileBits += strlen(binCode);
+	}
 }

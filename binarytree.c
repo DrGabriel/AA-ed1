@@ -7,7 +7,7 @@ BINARY_TREE *new_tree(char data){
 	BINARY_TREE *tree = (BINARY_TREE*) malloc(sizeof(BINARY_TREE));
 
 	if(tree != NULL){
-		tree->root = create_node(data);
+		tree->root = new_node(data);
 	}else{
 		printf("No memory available for new tree\n");
 	}

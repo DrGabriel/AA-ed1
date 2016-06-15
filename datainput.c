@@ -2,12 +2,16 @@
 #include <stdlib.h>
 #include "datainput.h"
 #include <string.h>
+#include <time.h>
 
 int totalBits;
 unsigned long fileBits;
 unsigned char bit_buffer;
 
-long totalChar(FILE * file){
+
+
+long totalChar(char *fileName){
+	FILE *file = fopen(fileName,"r");
 	long totalChar = 0;
 	char c;
 
@@ -17,13 +21,14 @@ long totalChar(FILE * file){
 			break;
 		totalChar++;
 	}
-
+	fclose(file);
 	return totalChar;
 }
 
-LINKEDLIST * createLeafNodes(FILE *file, LINKEDLIST *list){
+LINKEDLIST * createLeafNodes(char *fileName, LINKEDLIST *list){
 	NODE *paux;
 	char data;
+	FILE *file = fopen(fileName,"r");
 
 	while(1){
 		data = getc(file);
@@ -37,19 +42,21 @@ LINKEDLIST * createLeafNodes(FILE *file, LINKEDLIST *list){
 			paux->frequency++;
 		}
 	}
+	fclose(file);
 	return list;
 
 }
 
-void compressFILE(char *inputName,char* outputName LINKEDLIST* charTable){
+void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 	// O bit_buffer eh global, pois ao colocar ele como parametro de funcao cria uma copia dele q sera destruida
 	CELL *paux = charTable->first;
 	char data;
 	FILE *input = fopen(inputName,"r");
 	FILE *output = fopen(outputName,"w");
+	clock_t start, end;
 
 	//Escreve a tabela no arquivo
-
+	start = clock();
 	while(paux != NULL){
 		fprintf(output, "%s%c",paux->binCode->bincode,paux->binCode->character);
 		paux = paux->next;
@@ -78,14 +85,19 @@ void compressFILE(char *inputName,char* outputName LINKEDLIST* charTable){
 			totalBits++;
 		}
 
-		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output);
 	}
+	end = clock();
 	fclose(input);
 	fclose(output);
+	printf("%lu\n",fileBits);
+	double compression = 1 - (fileBits/(double)(totalChar(inputName)*8));
+	printf("TAXA DE COMPRESSAO: %lf\n",compression);
+	printf("TEMPO DE COMPRESSAO: %lf segundos\n",(double)(end -start)/CLOCKS_PER_SEC);
 }
 
-void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
+void writeBinCode(char data,LINKEDLIST *charTable,char* fileName){
+	FILE * output = fopen(fileName,"w");
 	char *binCode = searchCode(data, charTable);//PEGA O CODIGO BINARIO DA LETRA
 	int i,tempBits;
 	totalBits += strlen(binCode);//TOTAL DE BITS LIDOS
@@ -97,7 +109,6 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 				bit_buffer |= 1;	//SE TIVER 1 ESCREVE 1 SENAO 0
 
 		}
-		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output); //ESCREVE NO ARQUIVO
 		totalBits = 0; //RESETA O TOTAL DE BITS
 		bit_buffer = 0; // EU ACHO QUE LIMPA O BUFFER
@@ -108,7 +119,6 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 			if(binCode[i] == '1')
 				bit_buffer |= 1;
 		}
-		fileBits +=8;
 		fwrite(&bit_buffer,1,1,output);
 		bit_buffer = 0;
 
@@ -125,13 +135,14 @@ void writeBinCode(char data,LINKEDLIST *charTable,FILE *output){
 				bit_buffer |= 1;
 		}
 	}
+	fclose(output);
 	 
 }
 
 
-void transformaBinario(FILE *entrada){
+void transformaBinario(char *nomeTexto){
   
-  //FILE* entrada = fopen(nomeTexto,"r");
+  FILE* entrada = fopen(nomeTexto,"r");
   
   int tamanho;
   int shift;
@@ -188,13 +199,13 @@ void transformaBinario(FILE *entrada){
         
      }
   }
-  for(i=0;i<tamanhoBin;i++)
- 	printf("%c\n",binarios[i]);
+  fclose(entrada);
 }
 
-void fileTotalBits(LINKEDLIST *charTable, FILE *input){
+void fileTotalBits(LINKEDLIST *charTable, char *fileName){
 	char data;
 	char *binCode;
+	FILE* input = fopen(fileName,"r");
 	while(1){
 		data =  fgetc(input);
 		if(data == EOF || data ==10)
@@ -202,4 +213,5 @@ void fileTotalBits(LINKEDLIST *charTable, FILE *input){
 		binCode = searchCode(data,charTable);
 		fileBits += strlen(binCode);
 	}
+	fclose(input);
 }

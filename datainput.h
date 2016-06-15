@@ -3,9 +3,10 @@
 #include "node.h"
 #include "linkedlist.h"
 
-long totalChar(FILE*);
-LINKEDLIST * createLeafNodes(FILE *, LINKEDLIST *);
+double getTime();
+long totalChar(char*);
+LINKEDLIST * createLeafNodes(char*, LINKEDLIST *);
 void compressFILE(char*, char*,LINKEDLIST*);
-void writeBinCode(char,LINKEDLIST *,FILE *);
-void fileTotalBits(LINKEDLIST *, FILE *);
+void writeBinCode(char,LINKEDLIST *,char*);
+void fileTotalBits(LINKEDLIST *, char*);
 #endif

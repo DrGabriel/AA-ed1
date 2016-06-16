@@ -64,7 +64,7 @@ void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 	fprintf(output,"\n");
 
 	//Escreve o total de bits
-	fileTotalBits(charTable,input);
+	fileTotalBits(charTable,inputName);
 	fprintf(output,"%lu\n",fileBits);
 
 	free(paux);
@@ -76,7 +76,7 @@ void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 		data = fgetc(input);
 		if(data == 10 || data == EOF)
 			break;
-		writeBinCode(data,charTable,output);
+		writeBinCode(data,charTable,outputName);
 	}
 
 	if(totalBits != 0){//COMPLETA ESPAÇOS COM 0 ATE FECHAR 1 BYTE, CASO O TOTAL DE BITS N SEJA MULTIPLO DE 8

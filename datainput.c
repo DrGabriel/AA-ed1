@@ -76,7 +76,7 @@ void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 		data = fgetc(input);
 		if(data == 10 || data == EOF)
 			break;
-		writeBinCode(data,charTable,outputName);
+		writeBinCode(data,charTable,output);
 	}
 
 	if(totalBits != 0){//COMPLETA ESPAÇOS COM 0 ATE FECHAR 1 BYTE, CASO O TOTAL DE BITS N SEJA MULTIPLO DE 8
@@ -96,8 +96,7 @@ void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 	printf("TEMPO DE COMPRESSAO: %lf segundos\n",(double)(end -start)/CLOCKS_PER_SEC);
 }
 
-void writeBinCode(char data,LINKEDLIST *charTable,char* fileName){
-	FILE * output = fopen(fileName,"w");
+void writeBinCode(char data,LINKEDLIST *charTable,FILE * output){
 	char *binCode = searchCode(data, charTable);//PEGA O CODIGO BINARIO DA LETRA
 	int i,tempBits;
 	totalBits += strlen(binCode);//TOTAL DE BITS LIDOS
@@ -135,8 +134,6 @@ void writeBinCode(char data,LINKEDLIST *charTable,char* fileName){
 				bit_buffer |= 1;
 		}
 	}
-	fclose(output);
-	 
 }
 
 

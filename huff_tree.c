@@ -57,10 +57,13 @@ void geraCodAux(NODE* raiz,char* cod,int fimCod,LINKEDLIST* codeList){
            geraCodAux(raiz->rightChild,copia,fimCod,codeList);
            
            if((raiz->leftChild == NULL) && (raiz->rightChild == NULL)){
-			   cod[fimCod-1] = '\0';
-			   CHARBINCODE* bincode = new_binCode(raiz->data,cod);
+			   char* copia2 =(char*)malloc(sizeof(char)*(fimCod));
+			   for(i=0;i<fimCod-1;i++)
+			       copia2[i]=cod[i];
+			   copia2[fimCod-1] = '\0';
+			   CHARBINCODE* bincode = new_binCode(raiz->data,copia2);
                insertList(NULL,bincode,codeList);
-               puts(cod);
+               puts(copia2);
           }
           //free(copia);
        }
@@ -83,7 +86,7 @@ LINKEDLIST* criaHuff_tree(LINKEDLIST* lista){
         
     }
     
-    printHeap(heap);
+   // printHeap(heap);
     
 	while( heap->end > 0){
 	     

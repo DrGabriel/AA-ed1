@@ -212,3 +212,43 @@ void fileTotalBits(LINKEDLIST *charTable, char *fileName){
 	}
 	fclose(input);
 }
+
+
+LINKEDLIST* reCreateTable(char* inputName){
+	char data;
+	char *code = malloc(sizeof(char)*10);
+	int i,j=0;
+	FILE *input = fopen(inputName,"r");
+
+	LINKEDLIST * table = new_list(); //Aloca espaço para a tabela
+	
+	while(1){
+		data = fgetc(input);
+		if(data == '\n')//Acabou a tabela
+			break;
+
+		if(data != '0' && data != '1'){//Eh um char
+			CHARBINCODE *paux = (CHARBINCODE*) malloc(sizeof(CHARBINCODE));//Ponteiro auxiliar para criar a tabela
+			char * codecpy = malloc(j * sizeof *codecpy);// aloco espaco para nova string
+			if(paux != NULL && codecpy!=NULL){	
+				for(i=0;i<j;i++)
+					codecpy[i] = code[i]; //copio o codigo lido
+				paux->character = data; //escrevo o char
+				paux->bincode = codecpy;//escrevo o codigo
+				insertList(NULL,paux,table);//insiro na tabela
+				j=0; //reseta contador
+			}else{
+				printf("No memory available for new CHARBINCODE or char pointer\n");
+			}
+		}else{
+			if(j>10)
+				code = realloc(code,j* sizeof *code);//se for um codigo maior que 10 bits realoco
+			code[j]=data;//eh 0 ou 1
+			j++;
+		}
+	}
+	printf("\n");
+	free(code);//code nao eh mais necessario
+	fclose(input);
+	return table;
+}

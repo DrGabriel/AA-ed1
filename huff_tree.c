@@ -25,12 +25,12 @@ LINKEDLIST* geraCod(NODE* raiz){
     LINKEDLIST* codes = new_list();
     geraCodAux(raiz,cod,fimCod,codes);
     
-    CELL* teste = codes->first;
-    for(i=0;i<codes->size;i++){
+/*    CELL* teste = codes->first;
+    for(i=0;i<(codes->size);i++){
 	   printf("%c\n", teste->leaf->data);
 	   teste = teste->next;	
 	}
-    
+  */  
     return codes;
     
 }

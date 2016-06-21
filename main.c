@@ -17,18 +17,26 @@ int main(int argc, char *argv[]){
 	
 	LINKEDLIST *list1 = new_list();
 	//CELL * paux;
-	//list1 = codeTable(list1);
+/*	list1 = codeTable(list1);
+	
+	CELL* teste = list1->first;
+    for(i=0;i<list1->size;i++){
+	   printf("%c\n", teste->leaf->data);
+	   teste = teste->next;	
+	}
+  */  
 	list1 = criaHuff_tree(createLeafNodes(argv[1],list1));
     
-    CELL* teste = list1->first;
+   /* teste = list1->first;
     
     for(i=0;i<list1->size;i++){
 	   printf("%c\n", teste->leaf->data);
 	   teste = teste->next;	
 	}
             
-	compressFILE(argv[1],argv[2],list1);
+*/	compressFILE(argv[1],argv[2],list1);
 	free(list1);
-
+      
+        printf("comprimi\n");
 	return 0;
 }

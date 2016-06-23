@@ -4,9 +4,10 @@
 #include <string.h>
 #include <time.h>
 
-int totalBits;
+long totalBits=0;
 unsigned long fileBits;
 unsigned char bit_buffer;
+char* codebinarios;
 
 
 
@@ -54,103 +55,119 @@ void compressFILE(char *inputName,char* outputName, LINKEDLIST* charTable){
 	FILE *input = fopen(inputName,"r");
 	FILE *output = fopen(outputName,"w");
 	clock_t start, end;
-
+	fprintf(output, "%s\n", inputName);//escreve nome original do arquivo
 	//Escreve a tabela no arquivo
 	start = clock();
 	while(paux != NULL){
-		fprintf(output, "%s%c",paux->binCode->bincode,paux->binCode->character);
+		fprintf(output, "%s %c",paux->binCode->bincode,paux->binCode->character);
 		paux = paux->next;
 	}
+	fprintf(output,"G");
 	fprintf(output,"\n");
 
 	//Escreve o total de bits
 	fileTotalBits(charTable,inputName);
 	fprintf(output,"%lu\n",fileBits);
-
 	free(paux);
-
-	//Retorna ponteiro de leitura para o inicio do arquivo
-	fseek(input,0,SEEK_SET);
-
-	while(1){
-		data = fgetc(input);
-		if(data == 10 || data == EOF)
-			break;
-		writeBinCode(data,charTable,output);
+	while(fileBits%8 !=0){
+		fileBits++;
 	}
+	posix_memalign((void**)&codebinarios,64,fileBits * sizeof *codebinarios);
+	copyBinCodes(input,charTable);
 
-	if(totalBits != 0){//COMPLETA ESPAÇOS COM 0 ATE FECHAR 1 BYTE, CASO O TOTAL DE BITS N SEJA MULTIPLO DE 8
-		while(totalBits != 8){
-			bit_buffer <<=1;
-			totalBits++;
-		}
-
-		fwrite(&bit_buffer,1,1,output);
-	}
+	writeBinCode(output);
 	end = clock();
+	free(codebinarios);
 	fclose(input);
 	fclose(output);
-	printf("%lu\n",fileBits);
 	double compression = 1 - (fileBits/(double)(totalChar(inputName)*8));
 	printf("TAXA DE COMPRESSAO: %lf\n",compression);
 	printf("TEMPO DE COMPRESSAO: %lf segundos\n",(double)(end -start)/CLOCKS_PER_SEC);
 }
 
-void writeBinCode(char data,LINKEDLIST *charTable,FILE * output){
-	char *binCode = searchCode(data, charTable);//PEGA O CODIGO BINARIO DA LETRA
-	int i,tempBits;
-	totalBits += strlen(binCode);//TOTAL DE BITS LIDOS
 
-	if(totalBits == 8){//SE COMPLETOU 1 BYTE ESCREVE O CHAR NO ARQUIVO
-		for(i=0;i<strlen(binCode);i++){
-			bit_buffer <<= 1;		//SHIFT DO BUFFER
-			if(binCode[i] == '1')	
-				bit_buffer |= 1;	//SE TIVER 1 ESCREVE 1 SENAO 0
+void uncompressFILE(char *inputName){
+	FILE * compressed = fopen(inputName,"r"); //arquivo comprimido
+	FILE * original; //arquivo descomprimido
+	LINKEDLIST* table; // variavel para a tabela de codigos
+	long tamanho; // total de bits
 
-		}
-		fwrite(&bit_buffer,1,1,output); //ESCREVE NO ARQUIVO
-		totalBits = 0; //RESETA O TOTAL DE BITS
-		bit_buffer = 0; // EU ACHO QUE LIMPA O BUFFER
-	}else if(totalBits > 8){ // SE O TOTAL DE BITS FOR MAIOR QUE 1 BYTE PEGA UMA PARTE DO CODIGO E ESCREVE NO ARQUIVO
-		tempBits = totalBits - 8;
-		for (i = 0; i < strlen(binCode) - tempBits; i++){
-			bit_buffer <<= 1;
-			if(binCode[i] == '1')
-				bit_buffer |= 1;
-		}
-		fwrite(&bit_buffer,1,1,output);
-		bit_buffer = 0;
+	char * name = malloc (256 *sizeof *name); // aloco memoria para o nome original do arquivo
+	if(fgets(name,256,compressed)){
+		name[strlen(name) - 1] = '\0';
+		original = fopen (name,"w"); // cria arquivo descomprimido com o nome original
+	}
+	table = reCreateTable(compressed); // recria a tabela de codigos e caracteres
 
-		totalBits = tempBits;
-		for (i; i < strlen(binCode); i++){//ESCREVE RESTO DO CODIGO NO BUFFER
-			bit_buffer <<= 1;
-			if(binCode[i] == '1')
-				bit_buffer |= 1;
-		}
-	}else{  //SE O TOTAL DE BITS FOR MENOR QUE 1 BYTE APENAS ESCREVE NO BUFFER
-		for(i=0;i<strlen(binCode);i++){
-			bit_buffer <<= 1;
-			if(binCode[i] == '1')
-				bit_buffer |= 1;
+	fscanf(compressed,"%ld",&tamanho); // le total de bits armazenados no arquivo excluindo os 0 compelementares
+	int *binarios = transformaBinario(compressed,tamanho);//vetor que armazena todos os bits do arquivo comprimido
+	int i,j=0,tam=1;
+	int * code = malloc(14* sizeof *code);// aloco espaco para variavel que recebe os codigos binarios
+	char letra;
+	for(i=0;i<tamanho +1;i++){
+			code[j] = binarios[i];
+		letra = searchBinCode(tam,code, table);//funcao retorna a letra caso encontre o codigo na tabela de codigos
+		tam++;
+		j++;
+		if(letra != '\0'){
+			free(code);//libera espaco na memoria e "limpa" a variavel code
+			code = malloc(14* sizeof *code); // realoco a mesma quantidade de memoria
+			fprintf(original, "%c",letra);// escrevo letra encontrada no arquivo
+			fflush(original);
+			j = 0; // reseto contador
+			tam=1;
 		}
 	}
 }
 
+void copyBinCodes(FILE* input,LINKEDLIST *charTable){
+	int j=0;
+	char data;
+	char *binCode;
+	while(1){
+		data = fgetc(input);
+		if(data == EOF)
+			break;
+		binCode = searchCode(data,charTable);
+		for(j=0;j<strlen(binCode);j++){
+			codebinarios[totalBits]=binCode[j];
+			totalBits++;
+		}
+	}
 
-void transformaBinario(char *nomeTexto){
+}
+void writeBinCode(FILE * output){
+	int i;
+	while(totalBits != fileBits){
+		codebinarios[totalBits] = '0';
+		totalBits++;
+	}
+	for(i=0;i<fileBits;i++){
+
+		bit_buffer <<= 1;
+		if(codebinarios[i] == '1')
+			bit_buffer |= 1;
+		if((i+1)%8 == 0){
+			fwrite (&bit_buffer, 1, 1, output);//ESCREVE NO ARQUIVO
+			bit_buffer =0;
+		}
+	
+	}
+
+}
+
+
+int* transformaBinario(FILE * entrada, long tamanho){
   
-  FILE* entrada = fopen(nomeTexto,"r");
+  //FILE* entrada = fopen(nomeTexto,"r");
   
-  int tamanho;
+  //long tamanho;
   int shift;
   int i,j;
+    //tamanho aqui é o numero de bits que será capturado;
   
-  
-  fscanf(entrada,"%d",&tamanho);
-  //tamanho aqui é o numero de bits que será capturado;
-  
-  char binarios[tamanho +1];
-  int tamanhoBin = tamanho;
+  int* binarios = malloc((tamanho +1) * sizeof *binarios);
+  long tamanhoBin = tamanho;
   
   shift=tamanho%8;
   shift=8-shift;
@@ -161,22 +178,24 @@ void transformaBinario(char *nomeTexto){
   }
   
   //tamanho agora tem o numero de chars do arquivo;
-  unsigned char chars [tamanho];
+  unsigned char *chars = malloc(tamanho* sizeof * chars);
   
-  fscanf(entrada,"%c",&chars[0]);//soh pra pegar o /n, q será sobrescrito abaixo
+  chars[0] = fgetc(entrada);//soh pra pegar o /n, q será sobrescrito abaixo
   for(i=0;i<tamanho;i++)
-	 fscanf(entrada,"%c",&chars[i]);
+  	chars[i] = fgetc(entrada);
+
+
   
   for(i=0;i<shift;i++){
       chars[tamanho-1]>>=1;
   }
   
-  int posicao = tamanhoBin-1;
+  long posicao = tamanhoBin-1;
   for(i=0;i<(8-shift);i++){
       if(chars[tamanho-1] & (unsigned int) 1)
-        binarios[posicao]='1';
+        binarios[posicao]=1;
       else
-        binarios[posicao]='0';
+        binarios[posicao]=0;
         
         chars[tamanho-1]>>=1;
         posicao--;   
@@ -186,9 +205,9 @@ void transformaBinario(char *nomeTexto){
       for(j=0;j<8;j++){
         
         if(chars[i] & (unsigned int) 1)
-            binarios[posicao]='1';
+            binarios[posicao]=1;
         else
-          binarios[posicao]='0';
+          binarios[posicao]=0;
         
         chars[i]>>=1;
         posicao--;   
@@ -196,7 +215,8 @@ void transformaBinario(char *nomeTexto){
         
      }
   }
-  fclose(entrada);
+  //fclose(entrada);
+  return binarios;
 }
 
 void fileTotalBits(LINKEDLIST *charTable, char *fileName){
@@ -205,7 +225,7 @@ void fileTotalBits(LINKEDLIST *charTable, char *fileName){
 	FILE* input = fopen(fileName,"r");
 	while(1){
 		data =  fgetc(input);
-		if(data == EOF || data ==10)
+		if(data == EOF)
 			break;
 		binCode = searchCode(data,charTable);
 		fileBits += strlen(binCode);
@@ -214,22 +234,29 @@ void fileTotalBits(LINKEDLIST *charTable, char *fileName){
 }
 
 
-LINKEDLIST* reCreateTable(char* inputName){
-	char data;
+LINKEDLIST* reCreateTable(FILE *input){
+	char previous;
+	char data ='a';
 	char *code = malloc(sizeof(char)*10);
 	int i,j=0;
-	FILE *input = fopen(inputName,"r");
+	int newLinelidos = 0,
+	spaceLidos = 0; 
 
 	LINKEDLIST * table = new_list(); //Aloca espaço para a tabela
 	
 	while(1){
+		previous = data;
 		data = fgetc(input);
-		if(data == '\n')//Acabou a tabela
-			break;
 
-		if(data != '0' && data != '1'){//Eh um char
+		if(previous != '0' && previous != '1' && data =='G')
+			break;
+		if(data == '\n')
+			newLinelidos++;
+
+		if(data != '0' && data != '1' && newLinelidos <= 1){//Eh um char
 			CHARBINCODE *paux = (CHARBINCODE*) malloc(sizeof(CHARBINCODE));//Ponteiro auxiliar para criar a tabela
 			char * codecpy = malloc(j * sizeof *codecpy);// aloco espaco para nova string
+			data = fgetc(input);// vou para o char ja q antes eh espaco
 			if(paux != NULL && codecpy!=NULL){	
 				for(i=0;i<j;i++)
 					codecpy[i] = code[i]; //copio o codigo lido
@@ -243,12 +270,14 @@ LINKEDLIST* reCreateTable(char* inputName){
 		}else{
 			if(j>10)
 				code = realloc(code,j* sizeof *code);//se for um codigo maior que 10 bits realoco
-			code[j]=data;//eh 0 ou 1
-			j++;
+			if(spaceLidos == 0){
+				code[j]=data;//eh 0 ou 1
+				j++;
+			}
+
 		}
 	}
 	printf("\n");
 	free(code);//code nao eh mais necessario
-	fclose(input);
 	return table;
 }

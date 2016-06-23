@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "linkedlist.h"
+#include <string.h>
 
 
 NODE * searchData(char data,LINKEDLIST * list){
@@ -78,21 +79,6 @@ int emptyList(LINKEDLIST *list){
 	return (list->size == 0);
 }
 
-LINKEDLIST *codeTable(LINKEDLIST *list){
-	CHARBINCODE * paux1 = new_binCode('a',"0011");
-	insertList(NULL,paux1,list);
-	paux1 = new_binCode('b',"011011");
-	insertList(NULL,paux1,list);
-	paux1 = new_binCode('c',"11111");
-	insertList(NULL,paux1,list);
-	paux1 = new_binCode('d',"00100");
-	insertList(NULL,paux1,list);
-	paux1 = new_binCode('e',"101");
-	insertList(NULL,paux1,list);
-
-	return list;
-}
-
 CHARBINCODE *new_binCode(char character, char* code){
 	CHARBINCODE * binCode = (CHARBINCODE*) malloc(sizeof(CHARBINCODE));
 	if(binCode != NULL){
@@ -114,4 +100,32 @@ char * searchCode(char data, LINKEDLIST * codeTable){
 	}
 	printf("CHAR NOT FOUND: %c DEC CODE: %d\n",data,data);
 	return NULL;
+}
+
+char searchBinCode(int tam,int *code,LINKEDLIST * codeTable){
+	CELL * paux = codeTable->first;
+	char * copia = malloc(tam * sizeof *copia);
+	int i,j=0;
+	for(i=0;i<tam;i++){
+		if(code[i] == 1)
+			copia[i] = '1';
+		else
+			copia[i] = '0';
+
+	}
+	while(paux!=NULL){
+		for(i=0;i<strlen(paux->binCode->bincode);i++){
+			if(paux->binCode->bincode[i]==copia[i])
+				j++;//Se os caracteres forem iguais incrementa j
+		}
+		if(j== strlen(paux->binCode->bincode))
+			return paux->binCode->character; //Se encontrou o codigo retorna
+		else
+			j=0; //Senão zera o contador
+
+		paux = paux->next;//Vai para o proximo codigo da lista encadeada
+	}
+	free(copia);
+
+	return '\0';//Nao encontrou o codigo
 }

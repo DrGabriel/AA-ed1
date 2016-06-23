@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "binarytree.h"
 #include <stdlib.h>
@@ -25,12 +24,6 @@ LINKEDLIST* geraCod(NODE* raiz){
     LINKEDLIST* codes = new_list();
     geraCodAux(raiz,cod,fimCod,codes);
     
-/*    CELL* teste = codes->first;
-    for(i=0;i<(codes->size);i++){
-	   printf("%c\n", teste->leaf->data);
-	   teste = teste->next;	
-	}
-  */  
     return codes;
     
 }
@@ -63,14 +56,12 @@ void geraCodAux(NODE* raiz,char* cod,int fimCod,LINKEDLIST* codeList){
 			   copia2[fimCod-1] = '\0';
 			   CHARBINCODE* bincode = new_binCode(raiz->data,copia2);
                insertList(NULL,bincode,codeList);
-               puts(copia2);
           }
           //free(copia);
        }
    
 }
 LINKEDLIST* criaHuff_tree(LINKEDLIST* lista){
-	
 	
 	//BINARY_TREE* arv =(BINARY_TREE*)malloc(sizeof(BINARY_TREE));
 	HEAP* heap = new_heap(lista->size);
@@ -111,8 +102,6 @@ LINKEDLIST* criaHuff_tree(LINKEDLIST* lista){
 	//arv->root = heap_pop(heap);
 	
 	LINKEDLIST* table = geraCod(heap_pop(heap));
-	
-	
 	
 
 	

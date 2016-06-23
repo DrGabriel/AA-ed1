@@ -5,8 +5,11 @@
 
 long totalChar(char*);
 LINKEDLIST * createLeafNodes(char*, LINKEDLIST *);
-LINKEDLIST* reCreateTable(char*);
+LINKEDLIST* reCreateTable(FILE*);
 void compressFILE(char*, char*,LINKEDLIST*);
-void writeBinCode(char,LINKEDLIST *,FILE*);
+void writeBinCode(FILE*);
 void fileTotalBits(LINKEDLIST *, char*);
+void uncompressFILE(char *);
+int* transformaBinario(FILE *, long);
+void copyBinCodes(FILE* ,LINKEDLIST *);
 #endif

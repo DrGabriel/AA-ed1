@@ -1,0 +1,8 @@
+	gcc -c heap.c -o heap.o
+	gcc -c huff_tree.c -o huff_tree.o
+	gcc -c binarytree.c -o binarytree.o
+	gcc -c node.c -o node.o
+	gcc -c linkedlist.c -o linkedlist.o
+	gcc -c datainput.c -o datainput.o
+	gcc -c main.c -o main.o
+	gcc -O3 -g main.o datainput.o linkedlist.o node.o binarytree.o huff_tree.o heap.o -o executavel

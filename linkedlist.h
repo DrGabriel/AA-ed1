@@ -24,9 +24,9 @@ void insertList(NODE*,CHARBINCODE*,LINKEDLIST *);
 CELL *new_cell(NODE *,CHARBINCODE *);
 CELL *removeFirst(LINKEDLIST *);
 LINKEDLIST * new_list();
-LINKEDLIST *codeTable(LINKEDLIST *);
 int emptyList(LINKEDLIST *);
 CHARBINCODE *new_binCode(char,char*);
 char * searchCode(char, LINKEDLIST *);
+char searchBinCode(int,int *,LINKEDLIST *);
 
 #endif
